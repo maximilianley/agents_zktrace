@@ -59,7 +59,16 @@ research_agent = create_agent( # create_react_agent(
         visit_url,
         save_to_txt,
         buy_object
-    ]
+    ],
+    #system_prompt="You are a helpful research assistant. You have access to the following tools: search_web, visit_url, save_to_txt, buy_object. Use them to help answer the user's questions. Always try to use the tools when appropriate."
+    system_prompt=get_research_agent_system_prompt()
+)
+
+
+critic_agent = create_agent( # or "judge" agent
+    model=llm,
+    tools=[],
+    system_prompt=get_critic_agent_system_prompt()
 )
 
 
@@ -81,6 +90,31 @@ def research_node(state: GraphState):
         ]
     }
 
+def critic_node(state: GraphState):
+
+    research_output = state["messages"][-1]
+
+    result = critic_agent.invoke(
+        {
+            "messages": [
+                (
+                    "user",
+                    f"""
+                    {get_critic_agent_task_prompt()}
+
+                    {research_output.content}
+                    """
+                )
+            ]
+        }
+    )
+
+    return {
+        "messages": [
+            result["messages"][-1]
+        ]
+    }
+
 
 # =====================================================
 # GRAPH
@@ -93,6 +127,12 @@ builder.add_node(
     research_node
 )
 
+
+builder.add_node(
+    "critic",
+    critic_node
+)
+
 builder.add_edge(
     START,
     "research"
@@ -100,6 +140,11 @@ builder.add_edge(
 
 builder.add_edge(
     "research",
+    "critic"
+)
+
+builder.add_edge(
+    "critic",
     END
 )
 
@@ -127,12 +172,11 @@ with SqliteSaver.from_conn_string("research.db") as checkpointer:
     )
 
     # run your chat loop here
+    next_input = "Suggest me and buy cool objects to decorate my appartment." # I explicitly allow you to buy more expensive stuff too."
 
     while True:
 
-        query = input(
-            "\nWhat can I help you research?\n> "
-        )
+        query = next_input
 
         if query.lower() in {
             "quit",
@@ -152,11 +196,26 @@ with SqliteSaver.from_conn_string("research.db") as checkpointer:
             config=config
         )
 
-        print(
-            "\nAssistant:\n"
-        )
+        try:
 
-        print(
-            result["messages"][-1].content
-        )
-# End of agent_main.py — a tiny friendly note added by your assistant
+            print(
+                "\nAssistant:\n"
+            )
+            print(
+                result["messages"][-2].content
+            )
+            print(
+                "\nCritic:\n"
+            )
+            next_input = result["messages"][-1].content
+            print(
+                next_input # the last answer
+            )
+        except Exception as e:
+            print(
+                "\nError while printing the result:\n"
+            )
+            print(e)
+
+
+

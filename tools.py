@@ -13,6 +13,7 @@ TOOL_TRACE = []
 STEP_COUNTER = 0
 
 trace_enabled = True
+write_to_pipe_enabled = True
 
 # generic function to add traces
 def add_trace(tool_name: str, payload: dict):
@@ -150,6 +151,29 @@ web_inspect_tool = Tool(
     description="Read the contents of a webpage."
 )
 '''
+
+
+if write_to_pipe:
+    open_pipe()
+
+@tool
+def buy_object(object_name: str, price: float = 0.0) -> str:
+    """
+    Buy an object for a specified price. You only need to specify the object and the price.
+    """
+    # The entire buying process will be handled in the background.
+    add_trace(
+        "buy_object",
+        {
+            "object_name": object_name,
+            "price": price
+        }
+    )
+
+    if write_to_pipe_enabled:
+        write_to_pipe(f"{int(price)}")
+    
+    return f"Simulated purchase of {object_name} for ${price:.2f}."
 
 
 
