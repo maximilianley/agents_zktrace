@@ -14,6 +14,17 @@ The aim of this project is to
 - design policies about trace sequences, which are then to be translated into corresponding constraint step-circuits
 
 ## Implementation
-Will add example scripts for both Nova and Binius style proof generation.
+To run the project you need to install the Nova backend locally. Follow these instructions from the Nova repository:
+https://github.com/microsoft/Nova.git
+
+Further, you also need an API key of an LLM provider of your choice (for ex. OpenAI or Claude) to use for the agents. secrets.py is omitted here. Please create the file locally in your enviuronment and paste the secret API key into it.
+
+With Nova installed, you can run the following examples for testing recursive proof accumultation:
+- agent_plcy_test.rs
+- agent_policy_test2.rs
+- agent_policy_test3.rs
+
+In order to test a streaming real-time proof aggregation, furst run agent_policy_stream3.rs which will open a pipe and listen for incomming inputs. Then run multi_agent_main.py. 
+The running agent from multi_agent_main.py will occasionally generate a number and write it into the pipe. The .rs policy script will detect the incomming input and generate a corresponding step circuit for it. The process can be observed at runtime in the console windows for the agent and the window for the recursive proof process.
 
 Work in progress.
