@@ -85,7 +85,3 @@ You can observe the process in real time through:
 - The recursive proof process console (`agent_policy_stream3.rs`)
 
 ---
-
-## Status
-
-🚧 **Work in Progress**
