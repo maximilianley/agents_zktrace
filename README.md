@@ -84,4 +84,3 @@ You can observe the process in real time through:
 - The agent console (`multi_agent_main.py`)
 - The recursive proof process console (`agent_policy_stream3.rs`)
 
----
